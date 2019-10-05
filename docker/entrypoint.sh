@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+rm -rf /app
 mkdir app
 cd app
 
