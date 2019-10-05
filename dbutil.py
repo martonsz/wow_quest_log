@@ -46,21 +46,24 @@ class WowDatabase:
     def _cursor(self):
         return self._connection.cursor()
 
-    def get_quests(self):
+    def get_quests(self, include_ignored=False):
         cursor = self._cursor()
 
         users_quests = {}
         try:
-            sql = """ SELECT username, quest_name, quest_status, quest_timestamp
+            where_sql = ""
+            if not include_ignored:
+                where_sql = "WHERE quest_ignore is not true"
+            sql = f""" SELECT username, quest_name, quest_status, quest_timestamp, quest_ignore
                       FROM tbl_quest
-                      WHERE quest_ignore is not true
+                      {where_sql}
                       ORDER BY quest_timestamp ASC;"""
-            cursor.execute(sql)
+            cursor.execute(sql, (include_ignored,))
             row = cursor.fetchone()
             while row is not None:
                 # print(row)
                 username = row[0]
-                quest = Quest(row[1], Status[row[2]], row[3])
+                quest = Quest(row[1], Status[row[2]], row[3], row[4])
                 # print(f"{username} {quest}")
                 user_list = users_quests.get(username)
                 if not user_list:
@@ -118,7 +121,7 @@ class WowDatabase:
                 for quest in reversed(quests):
                     user_quest = user_quests_result.get(quest.key())
                     if not user_quest:
-                        user_quest = UsersQuest(quest.key(), usernames)
+                        user_quest = UsersQuest(quest.key(), usernames, quest.ignored)
                         user_quests_result[quest.key()] = user_quest
                     user_quest.addUserQuest(username, quest)
 
@@ -140,13 +143,32 @@ class WowDatabase:
             # self._connection.autocommit=False
             sql = """ INSERT INTO tbl_quest
                       (username, quest_name, quest_status, quest_timestamp, changed) VALUES (%s,%s,%s,%s,%s)"""
-            record = (username, quest.name, quest.status.value, quest.timestamp, changed)
+            record = (
+                username,
+                quest.name,
+                quest.status.value,
+                quest.timestamp,
+                changed,
+            )
             cursor.execute(sql, record)
             self._connection.commit()
             print(f"{quest}")
         except psycopg2.errors.UniqueViolation as e:
             print(f"Already exists {quest} - {e}")
             self._rollback()
+        finally:
+            cursor.close()
+
+    def set_ignore_quest(self, quest_name: str, ignore: bool):
+        cursor = self._cursor()
+        print(f"Setting ignore = {ignore} for {quest_name}")
+        try:
+            sql = """ UPDATE tbl_quest
+                      SET quest_ignore = %s
+                      WHERE quest_name = %s"""
+            record = (ignore, quest_name)
+            cursor.execute(sql, record)
+            self._connection.commit()
         finally:
             cursor.close()
 

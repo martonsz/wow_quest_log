@@ -1,4 +1,5 @@
 import os
+import re
 import traceback
 from flask import Flask, request, render_template, flash, redirect, url_for
 from flask_basicauth import BasicAuth
@@ -36,7 +37,16 @@ def shutdown_server():
 def index():
     db = WowDatabase()
     try:
-        return render_template("index.html.j2", quests=db.get_quests())
+        include_ignored = request.args.get("include_ignored") == "True"
+
+        ignore_quest_name = request.args.get("ignore_quest")
+        if ignore_quest_name:
+            ignore = request.args.get("ignore") == "True"
+            ignore_quest_name = re.sub(" \(\d+\)$", "", ignore_quest_name)
+            db.set_ignore_quest(ignore_quest_name, ignore)
+            return redirect("/")
+
+        return render_template("index.html.j2", quests=db.get_quests(include_ignored))
     finally:
         db.close()
 

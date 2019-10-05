@@ -54,6 +54,15 @@ tr:hover {
     background-color: #EBD1DB;
 }
 
+a:link, a:visited, a:active{
+    text-decoration: none;
+    color: black;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 </style>
 </head>
 <body>
@@ -72,7 +81,9 @@ tr:hover {
         </tr>
         {% for quest in quests %}
         <tr>
-            <td>{{ quest.quest_name }}</td>
+            <td>
+                <a href="https://www.google.com/search?q=wow {{quest.quest_name}}" target="_blank">{{ quest.quest_name }}</a>
+            </td>
             {% for user_quest in quest.user_quests.values() %}
             <td style="text-align: center;"
             {% if user_quest.status %}
@@ -90,6 +101,13 @@ tr:hover {
                 </span>
             </td>
             {% endfor %}
+            <td>
+                {% if quest.ignored %}
+                <a href="/?ignore_quest={{quest.quest_name}}&ignore=False">Unignore</a>
+                {% else %}
+                <a href="/?ignore_quest={{quest.quest_name}}&ignore=True">Ignore</a>
+                {% endif %}
+            </td>
         </tr>
         {% endfor %}
     </table>
@@ -120,7 +138,12 @@ tr:hover {
     {% endwith %}
     </div>
     <div>
-        <a href="/shutdown">Restart server</a>
+        <a href="/shutdown">Restart server</a><br/>
+        {% if request.args.get("include_ignored") != "True" %}
+        <a href="/?include_ignored=True">Include ignored quests</a>
+        {% else %}
+        <a href="/?include_ignored=False">Hide ignored quests</a>
+        {% endif %}
   </div>
 </div>
 

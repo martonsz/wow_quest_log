@@ -9,11 +9,12 @@ class Status(Enum):
 
 
 class Quest:
-    def __init__(self, name=None, status=None, timestamp=None, serie=1):
+    def __init__(self, name=None, status=None, timestamp=None, ignored=False, serie=1):
         self.name = name
         self.status = status
         self.timestamp = timestamp
         self.serie = serie
+        self.ignored = ignored
 
     def key(self):
         if self.serie > 1:
@@ -58,9 +59,10 @@ class ChatLog:
 
 
 class UsersQuest:
-    def __init__(self, quest_name: str, usernames: list):
+    def __init__(self, quest_name: str, usernames: list, ignored: bool):
         self.quest_name = quest_name
         self.user_quests = {}
+        self.ignored = ignored
         for username in usernames:
             self.user_quests[username] = None
         self.compare_status = None

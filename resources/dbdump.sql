@@ -9,7 +9,7 @@ CREATE TABLE public.tbl_quest (
 	quest_name text NOT NULL,
 	quest_status text NOT NULL,
 	quest_timestamp timestamp NOT NULL,
-	quest_ignore bool NULL,
+	quest_ignore bool NULL DEFAULT false,
 	changed timestamptz NOT NULL DEFAULT now(),
 	CONSTRAINT tbl_quest_pk PRIMARY KEY (id),
 	CONSTRAINT tbl_quest_un UNIQUE (username, quest_name, quest_status, quest_timestamp)
