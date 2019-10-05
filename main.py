@@ -14,6 +14,18 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = b'_5#yyyL"F4Q8z\n\xec]/'
 
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def shutdown_server():
+    func = request.environ.get("werkzeug.server.shutdown")
+    if func is None:
+        raise RuntimeError("Not running with the Werkzeug Server")
+    func()
+
+
 @app.route("/", methods=["GET"])
 def index():
     db = WowDatabase()
@@ -21,10 +33,6 @@ def index():
         return render_template("index.html.j2", quests=db.get_quests())
     finally:
         db.close()
-
-
-def allowed_file(filename):
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route("/", methods=["POST"])
@@ -67,6 +75,13 @@ def upload_file():
 
     flash(f"Something when wrong {er}")
     return redirect("/")
+
+
+@app.route("/shutdown")
+def shutdown():
+    """ Shutdown server so that Docker can restart the container """
+    shutdown_server()
+    return "Server shutting down..."
 
 
 if __name__ == "__main__":
