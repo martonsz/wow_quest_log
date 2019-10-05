@@ -51,7 +51,8 @@ tr:hover {
 }
 
 .flashes {
-    background-color: #EBD1DB;
+    background-color: #FEE7B5;
+    font-size: 110%;
 }
 
 a:link, a:visited, a:active{
@@ -117,10 +118,10 @@ a:hover {
     <form method=post enctype=multipart/form-data action="/">
         <input type=file name=file>  
         <p>Username: <input type=text name=username_txt></p>
-        <input type="radio" name="username_radio" value="__NEW__" checked>New<br>
+        <input type="radio" name="username_radio" value="__NEW__" {% if "username" not in request.cookies %} checked {% endif %}>New<br>
         {% if quests | length  > 0 %}
         {% for username in quests[0].user_quests.keys()%}
-        <input type="radio" name="username_radio" value="{{username}}"> {{username}}<br>
+        <input type="radio" name="username_radio" value="{{username}}" {% if username == request.cookies.get("username") %} checked {% endif %}> {{username}}<br>
         {% endfor %}
         {% endif %}
         <input type=submit value=Upload>

@@ -55,6 +55,8 @@ def index():
 @basic_auth.required
 def upload_file():
     er = None
+    response = redirect("/")
+
     try:
         # check if the post request has the file part
         if "file" not in request.files:
@@ -75,23 +77,26 @@ def upload_file():
             flash("No username given")
             return redirect("/")
         print(f"username: {username}")
+        
+        
+        response.set_cookie("username", value=username)
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
             file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             file.save(file_path)
-            # return redirect(url_for("uploaded_file", filename=filename))
 
             log_reader = LogReader(file_path, username)
             log_reader.insert_quests()
-            return redirect("/")
+            flash("Data Import finished successfully")
+            return response
     except Exception as e:
         er = e
         traceback.print_exc()
 
     flash(f"Something when wrong {er}")
-    return redirect("/")
+    return response
 
 
 @app.route("/shutdown")
