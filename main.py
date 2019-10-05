@@ -1,6 +1,7 @@
 import os
 import traceback
 from flask import Flask, request, render_template, flash, redirect, url_for
+from flask_basicauth import BasicAuth
 from werkzeug.utils import secure_filename
 
 from read_log import LogReader
@@ -13,6 +14,10 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = b'_5#yyyL"F4Q8z\n\xec]/'
+
+app.config["BASIC_AUTH_USERNAME"] = "admin"
+app.config["BASIC_AUTH_PASSWORD"] = os.getenv("WOW_BASIC_AUTH_PASSWORD", "admin")
+basic_auth = BasicAuth(app)
 
 
 def allowed_file(filename):
@@ -27,6 +32,7 @@ def shutdown_server():
 
 
 @app.route("/", methods=["GET"])
+@basic_auth.required
 def index():
     db = WowDatabase()
     try:
@@ -36,6 +42,7 @@ def index():
 
 
 @app.route("/", methods=["POST"])
+@basic_auth.required
 def upload_file():
     er = None
     try:
@@ -78,6 +85,7 @@ def upload_file():
 
 
 @app.route("/shutdown")
+@basic_auth.required
 def shutdown():
     """ Shutdown server so that Docker can restart the container """
     shutdown_server()
@@ -85,5 +93,5 @@ def shutdown():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", ssl_context='adhoc', port=5000)
     print("Exiting")

@@ -1,3 +1,5 @@
 black
 flask
+Flask-BasicAuth
 psycopg2
+pyopenssl
