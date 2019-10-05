@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+<title>WOW Quests</title>
+<style>
+
+/* Table */
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 3px 10px;
+}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+tr:hover {
+    background-color: #f5f5f5;
+}
+
+.ACCEPTED {
+    background-color: #FEE7B5;
+}
+
+.COMPLETED {
+    background-color: #B5E0CE;
+}
+
+.MISSING {
+    background-color: #EBD1DB;
+}
+
+
+/* Create two columns that sits next to each other */
+.row {
+  display: flex;
+}
+
+.column1 {
+  flex: 56%;
+  padding: 10px;
+}
+
+.column2 {
+  flex: 44%;
+  padding: 10px;
+}
+
+.flashes {
+    background-color: #EBD1DB;
+}
+
+</style>
+</head>
+<body>
+
+
+<div class="row">
+  <div class="column1">
+    <table>
+        <tr>
+            <th>Quest</th>
+            {% if quests | length  > 0 %}
+            {% for username in quests[0].user_quests.keys()%}
+            <th>{{ username }}</th>
+            {% endfor %}
+            {% endif %}
+        </tr>
+        {% for quest in quests %}
+        <tr>
+            <td>{{ quest.quest_name }}</td>
+            {% for user_quest in quest.user_quests.values() %}
+            <td style="text-align: center;"
+            {% if user_quest.status %}
+            class="{{ user_quest.status.name }}"
+            {% else %}
+            class="MISSING"
+            {% endif %}
+            >
+                <span title="{{ user_quest.timestamp }}">
+                {% if user_quest.status %}
+                    {{ user_quest.status.name }}
+                {% else %}
+                    MISSING
+                {% endif%}
+                </span>
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
+
+  <div class="column2" style="background-color:#e4edf5;">
+    <form method=post enctype=multipart/form-data action="/">
+        <input type=file name=file>  
+        <p>Username: <input type=text name=username_txt></p>
+        <input type="radio" name="username_radio" value="__NEW__" checked>New<br>
+        {% if quests | length  > 0 %}
+        {% for username in quests[0].user_quests.keys()%}
+        <input type="radio" name="username_radio" value="{{username}}"> {{username}}<br>
+        {% endfor %}
+        {% endif %}
+        <input type=submit value=Upload>
+    </form>
+     <div>
+     <br/>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
