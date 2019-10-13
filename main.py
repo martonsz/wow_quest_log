@@ -12,6 +12,7 @@ from dbutil import WowDatabase
 UPLOAD_FOLDER = "./upload"
 ALLOWED_EXTENSIONS = {"txt"}
 
+DEBUG = os.getenv("WOW_DEBUG", "False") in ["True", "true"]
 ENABLED_HTTPS = os.getenv("WOW_ENABLE_HTTPS", "False") in ["True", "true"]
 BASIC_AUTH_PASS = os.getenv("WOW_BASIC_AUTH_PASSWORD", None)
 
@@ -114,6 +115,12 @@ def healthz():
     return "ok"
 
 if __name__ == "__main__":
+
+    if DEBUG:
+        for k, v in os.environ.items():
+            if "WOW_" in k:
+                print(f"{k}: {v}")
+
     if ENABLED_HTTPS:
         app.run(host="0.0.0.0", ssl_context="adhoc", port=5000)
     else:
