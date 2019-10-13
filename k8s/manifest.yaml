@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wow-quest-log
+  namespace: default
+  labels:
+    app: wow-quest-log
+spec:
+  selector:
+    matchLabels:
+      app: wow-quest-log
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: wow-quest-log
+    spec:
+      containers:
+        - name: wow-quest-log
+          image: martonsz/wow_quest_log:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              name: http
+          env:
+          - name: WOW_DEBUG
+            value: "true"
+          envFrom:
+          - secretRef:
+              name: wow-secret-env
+          livenessProbe:
+            httpGet:
+                path: /healthz
+                port: 5000
+            initialDelaySeconds: 15
+          readinessProbe:
+            httpGet:
+                path: /healthz
+                port: 5000
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: wow-quest-log
+  namespace: default
+spec:
+  ports:
+    - name: http
+      port: 5000
+  selector:
+    app: wow-quest-log
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: wow-quest-log-https
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/permanent-redirect-code: '307'
+    # Requires a basic auth service
+    #nginx.ingress.kubernetes.io/auth-url: "https://basicauth.mydomain.com/"
+    #nginx.ingress.kubernetes.io/auth-realm: "Autentisering krävs för att komma åt denna sida"
+spec:
+  tls:
+  - secretName: certificate-tls
+  rules:
+  - host: "wow.mydomain.com"
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: wow-quest-log
+          servicePort: 5000
