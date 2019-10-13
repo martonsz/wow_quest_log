@@ -5,6 +5,7 @@ from flask import Flask, request, render_template, flash, redirect, url_for
 from flask_basicauth import BasicAuth
 from werkzeug.utils import secure_filename
 
+from log_decorator import disable_logging
 from read_log import LogReader
 from dbutil import WowDatabase
 
@@ -107,6 +108,10 @@ def shutdown():
     shutdown_server()
     return "Server shutting down..."
 
+@app.route("/healthz", methods=["GET"])
+@disable_logging
+def healthz():
+    return "ok"
 
 if __name__ == "__main__":
     if ENABLED_HTTPS:
