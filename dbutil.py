@@ -76,8 +76,9 @@ class WowDatabase:
                         if q.name == quest.name:
                             if q.status is not Status.COMPLETED:
                                 print(
-                                    f"WARN: ACCEPTED, Invalid quest order {username} {quest} VS {q}"
+                                    f"WARN: ACCEPTED, Invalid quest order {username} {quest} VS {q}. Ignoring quest"
                                 )
+                                continue
                             quest.serie = q.serie + 1
                             # print(f"Found a serie. Increasing serie number {username} {quest} VS {q}")
                             break
