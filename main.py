@@ -9,6 +9,7 @@ from log_decorator import disable_logging
 from read_log import LogReader
 from dbutil import WowDatabase
 
+VERSION="1.0"
 UPLOAD_FOLDER = "./upload"
 ALLOWED_EXTENSIONS = {"txt"}
 
@@ -52,7 +53,7 @@ def index():
             db.set_ignore_quest(ignore_quest_name, ignore)
             return redirect("/")
 
-        return render_template("index.html.j2", quests=db.get_quests(include_ignored))
+        return render_template("index.html.j2", quests=db.get_quests(include_ignored), version=VERSION)
     finally:
         db.close()
 
