@@ -178,7 +178,7 @@ if __name__ == "__main__":
     wow_db = WowDatabase()
 
     try:
-        result = wow_db.get_quests()
+        result = wow_db.get_quests(include_ignored=True)
         for r in result:
             print(r)
 
